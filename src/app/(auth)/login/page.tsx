@@ -18,7 +18,7 @@ export default function LoginPage({
     const host = headersList.get("host");
     const protocol = host?.includes("localhost") ? "http" : "https";
     
-    const { data, error } = await supabase.auth.signInWithOAuth({
+    const { data } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
         redirectTo: `${protocol}://${host}/auth/callback`,
@@ -35,12 +35,14 @@ export default function LoginPage({
       <div className="w-full max-w-md space-y-8 rounded-xl bg-white p-10 shadow-lg ring-1 ring-black/5 dark:bg-gray-900 dark:ring-white/10">
         <div className="text-center">
           {config.brand.logoUrl && (
-            <div className="mx-auto mb-6 h-12 w-auto flex justify-center">
-              {/* Note: Fallback image element because Image component throws if src is fake */}
-              <img
+            <div className="mx-auto mb-6 h-12 w-auto flex justify-center relative">
+              <Image
                 src={config.brand.logoUrl}
                 alt={`${config.brand.name} Logo`}
+                width={200}
+                height={48}
                 className="h-12 w-auto object-contain"
+                unoptimized
               />
             </div>
           )}

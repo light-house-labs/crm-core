@@ -1,5 +1,6 @@
 "use client";
 import { config } from "@/lib/config";
+import Image from "next/image";
 import { LayoutDashboard, Users, UserCircle, Kanban, FolderGit2, Settings, BarChart2, LogOut } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -39,7 +40,15 @@ export default function CRMLayout({ children }: { children: React.ReactNode }) {
       <div className="flex w-64 flex-col border-r border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-950">
         <div className="flex h-16 items-center border-b border-gray-200 px-6 dark:border-gray-800">
           {config.brand.logoUrl ? (
-            <img src={config.brand.logoUrl} alt={config.brand.name} className="h-8 max-w-full object-contain" />
+            <div className="relative h-8 w-full">
+              <Image 
+                src={config.brand.logoUrl} 
+                alt={config.brand.name} 
+                fill 
+                className="object-contain object-left"
+                unoptimized
+              />
+            </div>
           ) : (
             <span className="text-lg font-bold text-primary">{config.brand.name}</span>
           )}
