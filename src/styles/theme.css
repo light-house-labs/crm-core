@@ -1,0 +1,17 @@
+/* src/styles/theme.css */
+/* This file is reserved for CSS variables driven by the tenant configuration. */
+/* Fallback definitions. In a true dynamic environment, these might be injected by layout.tsx */
+
+:root {
+  --primary-color: #333333;
+  --accent-color: #666666;
+  --foreground: #000000;
+  --background: #ffffff;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --foreground: #ffffff;
+    --background: #111111;
+  }
+}
