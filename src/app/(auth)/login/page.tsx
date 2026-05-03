@@ -1,14 +1,19 @@
 import { config } from "@/lib/config";
-import Image from "next/image";
 import { headers } from "next/headers";
-import { createServerSupabaseClient } from "@/lib/supabase";
+import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 
-export default function LoginPage({
+export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: { error?: string; error_description?: string };
+  searchParams: { error?: string; error_description?: string; code?: string };
 }) {
+  // If Supabase redirected the OAuth code here instead of /auth/callback,
+  // forward it to the correct route immediately.
+  if (searchParams.code) {
+    redirect(`/auth/callback?code=${searchParams.code}`);
+  }
+
   const signInWithGoogle = async () => {
     "use server";
     

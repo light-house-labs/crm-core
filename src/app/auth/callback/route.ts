@@ -1,5 +1,5 @@
-import { createServerSupabaseClient } from "@/lib/supabase";
-import { NextResponse } from "next/server"; // Oops, fixing this import path
+import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { NextResponse } from "next/server";
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
@@ -9,8 +9,10 @@ export async function GET(request: Request) {
   const error = searchParams.get("error");
   const error_description = searchParams.get("error_description");
 
+  // If Supabase Auth returns an error in the callback (e.g. database trigger blocked user)
   if (error) {
-    return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent(error)}&error_description=${encodeURIComponent(error_description || "")}`);
+    // Redirect to the generic auth error page to hide specific DB errors
+    return NextResponse.redirect(`${origin}/auth-error`);
   }
 
   if (code) {
@@ -18,13 +20,13 @@ export async function GET(request: Request) {
     const { error: sessionError } = await supabase.auth.exchangeCodeForSession(code);
     
     if (sessionError) {
-       // if the whitelist trigger denied access, sessionError will contain that msg
-       return NextResponse.redirect(`${origin}/login?error=Access%20Denied&error_description=${encodeURIComponent(sessionError.message)}`);
+       return NextResponse.redirect(`${origin}/auth-error`);
     }
 
     return NextResponse.redirect(`${origin}${next}`);
   }
 
   // return the user to an error page with instructions
-  return NextResponse.redirect(`${origin}/login?error=Invalid%20request`);
+  return NextResponse.redirect(`${origin}/auth-error`);
 }
+

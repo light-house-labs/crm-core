@@ -3,11 +3,15 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { config } from "@/lib/config";
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
-  title: config.brand.name,
-  description: "White-label CRM Core",
+  title: `${config.brand.name} · CRM Platform`,
+  description: "Professional white-label CRM platform for service businesses.",
 };
 
 export default function RootLayout({
@@ -16,9 +20,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className={inter.variable}>
       <head>
-        {/* Inject dynamic theme variables based on the active config */}
         <style
           dangerouslySetInnerHTML={{
             __html: `
@@ -31,7 +34,8 @@ export default function RootLayout({
         />
         <link rel="icon" href={config.brand.faviconUrl} />
       </head>
-      <body className={inter.className}>{children}</body>
+      <body className="font-[var(--font-inter)]" suppressHydrationWarning>{children}</body>
     </html>
   );
 }
+

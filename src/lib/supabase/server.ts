@@ -1,13 +1,5 @@
-import { createBrowserClient } from '@supabase/ssr';
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { cookies } from 'next/headers';
-
-export function createClient() {
-  return createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
-}
 
 export function createServerSupabaseClient() {
   const cookieStore = cookies();
@@ -23,16 +15,12 @@ export function createServerSupabaseClient() {
         set(name: string, value: string, options: CookieOptions) {
           try {
             cookieStore.set({ name, value, ...options });
-          } catch (_) {
-            // The `set` method was called from a Server Component.
-          }
+          } catch (_) {}
         },
         remove(name: string, options: CookieOptions) {
           try {
             cookieStore.set({ name, value: '', ...options });
-          } catch (_) {
-            // The `delete` method was called from a Server Component.
-          }
+          } catch (_) {}
         },
       },
     }
