@@ -7,7 +7,6 @@ export async function GET(request: Request) {
   // if "next" is in param, use it as the redirect URL
   const next = searchParams.get("next") ?? "/dashboard";
   const error = searchParams.get("error");
-  const error_description = searchParams.get("error_description");
 
   // If Supabase Auth returns an error in the callback (e.g. database trigger blocked user)
   if (error) {

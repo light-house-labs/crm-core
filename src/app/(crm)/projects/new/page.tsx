@@ -1,7 +1,7 @@
 "use client";
 import { config } from "@/lib/config";
 import { CrmOptions, defaultCrmOptions, fetchCrmOptions } from "@/lib/crm-options";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { ArrowLeft, Briefcase, Code, Calendar, DollarSign, Target } from "lucide-react";
 import Link from "next/link";
@@ -29,7 +29,7 @@ type InitialProjectData = {
   assigned_to?: string | null;
 };
 
-export default function NewProjectPage() {
+function NewProjectContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const leadId = searchParams.get('from_lead');
@@ -293,5 +293,13 @@ export default function NewProjectPage() {
         </form>
       </div>
     </div>
+  );
+}
+
+export default function NewProjectPage() {
+  return (
+    <Suspense fallback={<div className="p-8 text-center text-gray-500 animate-pulse">Loading form...</div>}>
+      <NewProjectContent />
+    </Suspense>
   );
 }

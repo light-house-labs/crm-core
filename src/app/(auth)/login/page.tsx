@@ -1,5 +1,4 @@
 import { config } from "@/lib/config";
-import { headers } from "next/headers";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 
