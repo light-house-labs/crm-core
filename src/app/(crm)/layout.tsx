@@ -14,6 +14,7 @@ import {
   HelpCircle,
   X,
   LogOut,
+  Menu,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -30,7 +31,7 @@ const navItems = [
   { name: "Settings", href: "/settings", icon: Settings },
 ];
 
-function Sidebar() {
+function Sidebar({ isOpen, setIsOpen }: { isOpen: boolean; setIsOpen: (val: boolean) => void }) {
   const pathname = usePathname();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [user, setUser] = useState<any>(null);
@@ -53,11 +54,21 @@ function Sidebar() {
   };
 
   return (
-    <aside className="flex h-screen w-64 flex-shrink-0 flex-col border-r border-[#E8E8E8] bg-white">
-      {/* Logo */}
-      <div className="flex h-16 items-center border-b border-[#E8E8E8] px-5">
-        <img src={config.brand.logoUrl} alt={config.brand.name} className="h-8 w-auto object-contain" />
-      </div>
+    <>
+      {isOpen && (
+        <div 
+          className="fixed inset-0 z-40 bg-black/50 md:hidden"
+          onClick={() => setIsOpen(false)}
+        />
+      )}
+      <aside className={`fixed inset-y-0 left-0 z-50 flex w-64 flex-shrink-0 flex-col border-r border-[#E8E8E8] bg-white transition-transform duration-300 md:static md:translate-x-0 ${isOpen ? "translate-x-0" : "-translate-x-full"}`}>
+        {/* Logo */}
+        <div className="flex h-16 items-center justify-between border-b border-[#E8E8E8] px-5">
+          <img src={config.brand.logoUrl} alt={config.brand.name} className="h-8 w-auto object-contain" />
+          <button className="md:hidden text-[#6B6B6B]" onClick={() => setIsOpen(false)}>
+            <X className="h-5 w-5" />
+          </button>
+        </div>
 
       {/* Navigation */}
       <nav className="flex-1 overflow-y-auto px-3 py-4">
@@ -118,10 +129,11 @@ function Sidebar() {
         </div>
       </div>
     </aside>
+    </>
   );
 }
 
-function TopBar() {
+function TopBar({ onMenuClick }: { onMenuClick: () => void }) {
   const pathname = usePathname();
   const router = useRouter();
   const supabase = useMemo(() => createClient(), []);
@@ -224,14 +236,19 @@ function TopBar() {
   };
 
   return (
-    <header className="relative flex h-16 flex-shrink-0 items-center justify-between border-b border-[#E8E8E8] bg-white px-6">
-      <div>
-        <h1 className="text-base font-semibold text-[#161616]">
+    <header className="relative flex h-16 flex-shrink-0 items-center justify-between border-b border-[#E8E8E8] bg-white px-4 md:px-6">
+      <div className="flex items-center gap-3">
+        <button className="md:hidden p-1.5 text-[#161616] hover:bg-[#F5F5F5] rounded-md transition" onClick={onMenuClick}>
+          <Menu className="h-5 w-5" />
+        </button>
+        <div>
+          <h1 className="text-base font-semibold text-[#161616]">
           {currentPage?.name ?? "CRM"}
         </h1>
         <p className="text-xs text-[#6B6B6B]">
           {config.brand.name} · {new Date().toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
         </p>
+      </div>
       </div>
       <div className="flex items-center gap-3">
         <button onClick={() => setIsSearchOpen(true)} className="flex h-9 items-center gap-2 rounded-md border border-[#E8E8E8] bg-white px-3 text-sm text-[#6B6B6B] hover:bg-[#F5F5F5] transition-colors">
@@ -307,12 +324,20 @@ function TopBar() {
 }
 
 export default function CRMLayout({ children }: { children: React.ReactNode }) {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  // Close mobile menu when pathname changes
+  const pathname = usePathname();
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [pathname]);
+
   return (
     <div className="flex h-screen overflow-hidden bg-[#F7F7F7]">
-      <Sidebar />
-      <div className="flex flex-1 flex-col overflow-hidden">
-        <TopBar />
-        <main className="flex-1 overflow-y-auto p-6">{children}</main>
+      <Sidebar isOpen={isMobileMenuOpen} setIsOpen={setIsMobileMenuOpen} />
+      <div className="flex flex-1 flex-col min-w-0 overflow-hidden">
+        <TopBar onMenuClick={() => setIsMobileMenuOpen(true)} />
+        <main className="flex-1 overflow-y-auto p-4 md:p-6">{children}</main>
       </div>
     </div>
   );
