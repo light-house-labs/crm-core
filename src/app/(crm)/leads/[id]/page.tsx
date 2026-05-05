@@ -15,6 +15,7 @@ type AssignableUser = {
 
 type LeadRecord = {
   id: string;
+  pipeline_stage_id: number | null;
   first_name: string | null;
   last_name: string | null;
   company: string | null;
@@ -87,8 +88,8 @@ export default function LeadProfilePage({ params }: { params: { id: string } }) 
 
     setLoading(true);
     const supabase = createClient();
-    const stageId = editForm.status;
-    const stage = config.pipeline.stages.find(s => s.id.toString() === stageId?.toString());
+    const stageId = editForm.status?.toString();
+    const stage = config.pipeline.stages.find(s => s.id === stageId);
 
     const { error } = await supabase.from("leads").update({
       first_name: editForm.first_name,
@@ -99,8 +100,8 @@ export default function LeadProfilePage({ params }: { params: { id: string } }) 
       website: editForm.website,
       project_type: editForm.project_type,
       budget_range: editForm.budget_range,
-      status: stage?.slug || editForm.status,
-      pipeline_stage_id: stageId ? parseInt(stageId as string) : undefined,
+      status: stage?.id || editForm.status,
+      pipeline_stage_id: stage?.order,
       assigned_to: editForm.assigned_to_id || null,
     }).eq("id", params.id);
     
@@ -208,8 +209,11 @@ export default function LeadProfilePage({ params }: { params: { id: string } }) 
               <h3 className="text-sm font-semibold text-[#161616]">Lead Information</h3>
               <select 
                 disabled={!isEditing}
-                value={editForm.pipeline_stage_id || editForm.status || ""}
-                onChange={(e) => setEditForm({...editForm, status: e.target.value, pipeline_stage_id: parseInt(e.target.value)})}
+                value={editForm.status || ""}
+                onChange={(e) => {
+                  const stage = config.pipeline.stages.find(s => s.id === e.target.value);
+                  setEditForm({...editForm, status: e.target.value, pipeline_stage_id: stage?.order});
+                }}
                 className="text-xs font-semibold rounded-full px-3 py-1 bg-gray-100 border border-gray-200 outline-none focus:border-[#ED711D] disabled:opacity-80 disabled:cursor-not-allowed disabled:appearance-none"
               >
                 {config.pipeline.stages.map(s => (

@@ -1,4 +1,3 @@
-// tenant.config.ts (feature/lighthouse branch)
 export const tenantConfig = {
   brand: {
     name: "Lighthouse Labs",

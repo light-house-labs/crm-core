@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { Users, DollarSign, Activity } from "lucide-react";
+import { Users, DollarSign, Activity, Target } from "lucide-react";
 import { config } from "@/lib/config";
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 
@@ -12,8 +12,8 @@ export default function AnalyticsPage() {
     totalProjects: 0,
     totalRevenue: 0,
     winRate: 0,
-    sourceData: [] as any[],
-    revenueData: [] as any[],
+    sourceData: [] as Array<{ name: string; value: number }>,
+    revenueData: [] as Array<{ month: string; revenue: number }>,
   });
   const [loading, setLoading] = useState(true);
 
@@ -27,7 +27,8 @@ export default function AnalyticsPage() {
       const { data: projects } = await supabase.from("projects").select("total_budget, created_at, launch_date");
       
       const totalLeads = leads?.length || 0;
-      const convertedLeads = leads?.filter(l => l.status === "converted").length || 0;
+      const wonStageId = config.pipeline.stages.find(stage => stage.id === "won")?.id || "converted";
+      const convertedLeads = leads?.filter(l => l.status === wonStageId || l.status === "converted").length || 0;
       const winRate = totalLeads > 0 ? Math.round((convertedLeads / totalLeads) * 100) : 0;
       
       const totalProjects = projects?.length || 0;
@@ -150,7 +151,7 @@ export default function AnalyticsPage() {
                       ))}
                     </Pie>
                     <Tooltip 
-                      formatter={(value: number) => [`${value} Leads`, 'Count']}
+                      formatter={(value) => [`${Number(value ?? 0)} Leads`, 'Count']}
                       contentStyle={{ borderRadius: '8px', border: '1px solid #E8E8E8', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}
                     />
                     <Legend verticalAlign="bottom" height={36} iconType="circle" />
@@ -170,12 +171,12 @@ export default function AnalyticsPage() {
                       axisLine={false} 
                       tickLine={false} 
                       tick={{ fontSize: 12, fill: '#6B6B6B' }}
-                      tickFormatter={(value) => `$${value/1000}k`}
+                      tickFormatter={(value) => `${config.localization.currencySymbol}${Number(value) / 1000}k`}
                       dx={-10}
                     />
                     <Tooltip 
                       cursor={{ fill: '#F5F5F5' }}
-                      formatter={(value: number) => [`$${value.toLocaleString()}`, 'Forecast']}
+                      formatter={(value) => [`${config.localization.currencySymbol}${Number(value ?? 0).toLocaleString()}`, 'Forecast']}
                       contentStyle={{ borderRadius: '8px', border: '1px solid #E8E8E8', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}
                     />
                     <Bar dataKey="revenue" fill="#ED711D" radius={[4, 4, 0, 0]} maxBarSize={50} />
@@ -187,26 +188,5 @@ export default function AnalyticsPage() {
         </>
       )}
     </div>
-  );
-}
-
-function Target(props: any) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <circle cx="12" cy="12" r="10" />
-      <circle cx="12" cy="12" r="6" />
-      <circle cx="12" cy="12" r="2" />
-    </svg>
   );
 }

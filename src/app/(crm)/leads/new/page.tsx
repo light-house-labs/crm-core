@@ -39,8 +39,8 @@ export default function NewLeadPage() {
     setError(null);
     
     const formData = new FormData(e.currentTarget);
-    const stageId = formData.get("status");
-    const stage = config.pipeline.stages.find(s => s.id.toString() === stageId);
+    const stageId = formData.get("status")?.toString() || config.pipeline.stages[0]?.id || "new";
+    const stage = config.pipeline.stages.find(s => s.id === stageId);
 
     const data = {
       first_name: formData.get("first_name"),
@@ -54,8 +54,8 @@ export default function NewLeadPage() {
       timeline: formData.get("timeline"),
       outreach_channel: formData.get("outreach_channel"),
       assigned_to: formData.get("assigned_to") || null,
-      status: stage?.slug || "new",
-      pipeline_stage_id: stageId ? parseInt(stageId as string) : 1,
+      status: stage?.id || stageId,
+      pipeline_stage_id: stage?.order || 1,
       notes: formData.get("notes"),
       follow_up_at: formData.get("follow_up_at") || null,
       source: formData.get("outreach_channel") || "other",

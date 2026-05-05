@@ -104,7 +104,8 @@ export default function DashboardPage() {
   const pipelineValue = projects
     .filter((project) => project.status !== "archived")
     .reduce((sum, project) => sum + Number(project.total_budget ?? 0), 0);
-  const convertedLeads = leads.filter((lead) => lead.status === "converted").length;
+  const wonStageId = config.pipeline.stages.find(stage => stage.id === "won")?.id || "converted";
+  const convertedLeads = leads.filter((lead) => lead.status === wonStageId || lead.status === "converted").length;
   const lostLeads = leads.filter((lead) => lead.status === "lost").length;
   const closedLeads = convertedLeads + lostLeads;
   const winRate = closedLeads ? Math.round((convertedLeads / closedLeads) * 100) : 0;
@@ -129,7 +130,7 @@ export default function DashboardPage() {
     {
       title: "Win Rate",
       value: `${winRate}%`,
-      description: closedLeads ? "converted vs lost" : "no closed leads yet",
+      description: closedLeads ? "won vs lost" : "no closed leads yet",
       icon: Target,
     },
     {

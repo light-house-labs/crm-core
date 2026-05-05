@@ -118,9 +118,10 @@ export default function NewProjectPage() {
       setLoading(false);
     } else {
       if (leadId) {
-        // Update lead to converted
+        const wonStage = config.pipeline.stages.find(stage => stage.id === "won") || config.pipeline.stages.find(stage => stage.id === "converted") || config.pipeline.stages[config.pipeline.stages.length - 1];
         await supabase.from("leads").update({ 
-          status: "converted", 
+          status: wonStage?.id || "converted",
+          pipeline_stage_id: wonStage?.order,
           converted_to_project: newProject.id 
         }).eq("id", leadId);
       }

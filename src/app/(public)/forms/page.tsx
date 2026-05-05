@@ -26,6 +26,7 @@ export default function PublicFormPage() {
     setError(null);
     
     const formData = new FormData(e.currentTarget);
+    const firstStage = config.pipeline.stages[0];
     const data = {
       first_name: formData.get("first_name"),
       last_name: formData.get("last_name"),
@@ -38,7 +39,8 @@ export default function PublicFormPage() {
       timeline: formData.get("timeline"),
       message: formData.get("message"),
       source: "website_form",
-      status: "new"
+      status: firstStage?.id || "new",
+      pipeline_stage_id: firstStage?.order || 1,
     };
 
     const supabase = createClient();

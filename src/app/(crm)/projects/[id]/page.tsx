@@ -1,4 +1,5 @@
 "use client";
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { config } from "@/lib/config";
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
@@ -16,7 +17,7 @@ export default function ProjectProfilePage({ params }: { params: { id: string } 
   const [loading, setLoading] = useState(true);
   const [pctForm, setPctForm] = useState(0);
   const [users, setUsers] = useState<any[]>([]);
-  const [isDeleting, setIsDeleting] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
     async function fetchProject() {

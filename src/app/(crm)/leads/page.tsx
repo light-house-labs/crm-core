@@ -3,14 +3,16 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { Plus, Search, ArrowUpDown, ExternalLink, MoreHorizontal } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { config } from "@/lib/config";
 
-const statusConfig: Record<string, { label: string; className: string }> = {
-  new: { label: "New", className: "bg-gray-100 text-gray-700 border border-gray-200" },
-  contacted: { label: "Contacted", className: "bg-blue-50 text-blue-700 border border-blue-200" },
-  qualified: { label: "Qualified", className: "bg-amber-50 text-amber-700 border border-amber-200" },
-  converted: { label: "Converted", className: "bg-green-50 text-green-700 border border-green-200" },
-  lost: { label: "Lost", className: "bg-red-50 text-red-700 border border-red-200" },
-};
+const statusClassNames = [
+  "bg-gray-100 text-gray-700 border border-gray-200",
+  "bg-teal-50 text-teal-700 border border-teal-200",
+  "bg-blue-50 text-blue-700 border border-blue-200",
+  "bg-amber-50 text-amber-700 border border-amber-200",
+  "bg-green-50 text-green-700 border border-green-200",
+  "bg-red-50 text-red-700 border border-red-200",
+];
 
 const sourceConfig: Record<string, string> = {
   "LinkedIn": "bg-blue-50 text-blue-700",
@@ -38,6 +40,15 @@ export default function LeadsPage() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [leads, setLeads] = useState<LeadRow[]>([]);
+  const stageConfig = Object.fromEntries(
+    config.pipeline.stages.map((stage, index) => [
+      stage.id,
+      {
+        label: stage.label,
+        className: statusClassNames[index] || "bg-gray-100 text-gray-600 border border-gray-200",
+      },
+    ])
+  );
   const [menuOpenId, setMenuOpenId] = useState<string | null>(null);
 
   const deleteLead = async (id: string) => {
@@ -103,7 +114,7 @@ export default function LeadsPage() {
         </div>
 
         <div className="flex items-center gap-2">
-          {["all", "new", "contacted", "qualified", "converted", "lost"].map((s) => (
+          {["all", ...config.pipeline.stages.map(stage => stage.id)].map((s) => (
             <button
               key={s}
               onClick={() => setStatusFilter(s)}
@@ -113,7 +124,7 @@ export default function LeadsPage() {
                   : "border border-[#E8E8E8] bg-white text-[#6B6B6B] hover:bg-[#F5F5F5]"
               }`}
             >
-              {s === "all" ? "All" : s}
+              {s === "all" ? "All" : stageConfig[s]?.label || s}
             </button>
           ))}
         </div>
@@ -152,7 +163,7 @@ export default function LeadsPage() {
               </tr>
             ) : (
               filtered.map((lead) => {
-                const statusInfo = statusConfig[lead.status ?? ""] ?? { label: lead.status ?? "Unknown", className: "bg-gray-100 text-gray-600 border border-gray-200" };
+                const statusInfo = stageConfig[lead.status ?? ""] ?? { label: lead.status ?? "Unknown", className: "bg-gray-100 text-gray-600 border border-gray-200" };
                 return (
                   <tr key={lead.id} className="hover:bg-[#FAFAFA] transition-colors group">
                     <td className="px-5 py-4">

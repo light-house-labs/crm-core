@@ -13,6 +13,7 @@ import {
   Search,
   HelpCircle,
   X,
+  LogOut,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -31,18 +32,28 @@ const navItems = [
 
 function Sidebar() {
   const pathname = usePathname();
+  const [user, setUser] = useState<any>(null);
+
+  useEffect(() => {
+    async function loadUser() {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+    }
+    loadUser();
+  }, []);
+
+  const handleLogout = async () => {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    window.location.href = "/login";
+  };
 
   return (
     <aside className="flex h-screen w-64 flex-shrink-0 flex-col border-r border-[#E8E8E8] bg-white">
       {/* Logo */}
-      <div className="flex h-16 items-center gap-3 border-b border-[#E8E8E8] px-5">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#ED711D]">
-          <span className="text-xs font-bold text-white">C</span>
-        </div>
-        <div>
-          <p className="text-sm font-bold text-[#161616] leading-none">{config.brand.name}</p>
-          <p className="text-[10px] text-[#6B6B6B] mt-0.5 leading-none">CRM Platform</p>
-        </div>
+      <div className="flex h-16 items-center border-b border-[#E8E8E8] px-5">
+        <img src={config.brand.logoUrl} alt={config.brand.name} className="h-8 w-auto object-contain" />
       </div>
 
       {/* Navigation */}
@@ -82,14 +93,25 @@ function Sidebar() {
 
       {/* Footer */}
       <div className="border-t border-[#E8E8E8] p-4">
-        <div className="flex items-center gap-3 rounded-md px-2 py-2">
-          <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-[#ED711D] text-xs font-bold text-white">
-            A
+        <div className="group flex items-center justify-between rounded-md px-2 py-2 hover:bg-[#F5F5F5] transition-colors">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-[#ED711D] text-xs font-bold text-white uppercase">
+              {user?.email?.[0] || "U"}
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-xs font-semibold text-[#161616]">
+                {user?.user_metadata?.full_name || user?.user_metadata?.name || "User"}
+              </p>
+              <p className="truncate text-[10px] text-[#6B6B6B]">{user?.email || "Loading..."}</p>
+            </div>
           </div>
-          <div className="min-w-0 flex-1">
-            <p className="truncate text-xs font-semibold text-[#161616]">Admin User</p>
-            <p className="truncate text-[10px] text-[#6B6B6B]">admin@crm.com</p>
-          </div>
+          <button 
+            onClick={handleLogout}
+            className="p-1.5 text-[#6B6B6B] hover:text-red-600 rounded-md opacity-0 group-hover:opacity-100 transition-all"
+            title="Log Out"
+          >
+            <LogOut className="h-4 w-4" />
+          </button>
         </div>
       </div>
     </aside>
