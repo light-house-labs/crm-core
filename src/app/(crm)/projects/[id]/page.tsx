@@ -18,6 +18,8 @@ export default function ProjectProfilePage({ params }: { params: { id: string } 
   const [pctForm, setPctForm] = useState(0);
   const [users, setUsers] = useState<any[]>([]);
   const [isEditing, setIsEditing] = useState(false);
+  const [isInvoiceModalOpen, setIsInvoiceModalOpen] = useState(false);
+  const [invoiceForm, setInvoiceForm] = useState({ amount: "", due_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], notes: "" });
 
   useEffect(() => {
     async function fetchProject() {
@@ -91,17 +93,18 @@ export default function ProjectProfilePage({ params }: { params: { id: string } 
     setIsEditing(false);
   }
 
-  async function handleNewInvoice() {
-    const amount = prompt("Enter invoice amount:");
-    if (!amount || isNaN(Number(amount))) return;
+  async function handleCreateInvoice(e: React.FormEvent) {
+    e.preventDefault();
+    if (!invoiceForm.amount || isNaN(Number(invoiceForm.amount))) return;
     
     setLoading(true);
     const supabase = createClient();
     const newInvoice = {
       project_id: params.id,
-      invoice_number: `INV-${Math.floor(Math.random() * 10000)}`,
-      amount: Number(amount),
-      due_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      invoice_number: `INV-${Math.floor(1000 + Math.random() * 9000)}`,
+      amount: Number(invoiceForm.amount),
+      due_date: invoiceForm.due_date,
+      notes: invoiceForm.notes,
       status: 'draft'
     };
     
@@ -110,6 +113,8 @@ export default function ProjectProfilePage({ params }: { params: { id: string } 
       alert("Error creating invoice: " + error.message);
     } else {
       setInvoices([...invoices, data]);
+      setIsInvoiceModalOpen(false);
+      setInvoiceForm({ amount: "", due_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], notes: "" });
     }
     setLoading(false);
   }
@@ -142,7 +147,7 @@ export default function ProjectProfilePage({ params }: { params: { id: string } 
           <button onClick={handleDelete} className="px-4 py-2 rounded-md bg-red-50 text-sm font-bold text-red-600 border border-red-200 hover:bg-red-100 transition-colors">
             Delete Project
           </button>
-          <button onClick={handleNewInvoice} className="flex items-center gap-2 rounded-md bg-[#ED711D] px-4 py-2 text-sm font-bold text-white shadow-sm hover:bg-[#D4611A] transition-colors">
+          <button onClick={() => setIsInvoiceModalOpen(true)} className="flex items-center gap-2 rounded-md bg-[#ED711D] px-4 py-2 text-sm font-bold text-white shadow-sm hover:bg-[#D4611A] transition-colors">
             <Plus className="h-4 w-4" /> New Invoice
           </button>
         </div>
@@ -360,6 +365,62 @@ export default function ProjectProfilePage({ params }: { params: { id: string } 
         </div>
         
       </div>
+
+      {isInvoiceModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-md rounded-xl bg-white shadow-lg">
+            <div className="flex items-center justify-between border-b border-[#E8E8E8] px-6 py-4">
+              <h3 className="text-lg font-bold text-[#161616]">Create Invoice</h3>
+              <button onClick={() => setIsInvoiceModalOpen(false)} className="text-[#6B6B6B] hover:text-[#161616]">
+                &times;
+              </button>
+            </div>
+            <form onSubmit={handleCreateInvoice} className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-[#161616] mb-1.5">Amount ({config.localization.currency})</label>
+                <input 
+                  type="number" 
+                  step="0.01" 
+                  required 
+                  value={invoiceForm.amount}
+                  onChange={e => setInvoiceForm({...invoiceForm, amount: e.target.value})}
+                  className="w-full rounded-md border border-[#E8E8E8] px-3 py-2 text-sm outline-none focus:border-[#ED711D]" 
+                  placeholder="0.00"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-[#161616] mb-1.5">Due Date</label>
+                <input 
+                  type="date" 
+                  required 
+                  value={invoiceForm.due_date}
+                  onChange={e => setInvoiceForm({...invoiceForm, due_date: e.target.value})}
+                  className="w-full rounded-md border border-[#E8E8E8] px-3 py-2 text-sm outline-none focus:border-[#ED711D]" 
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-[#161616] mb-1.5">Notes</label>
+                <textarea 
+                  rows={3} 
+                  value={invoiceForm.notes}
+                  onChange={e => setInvoiceForm({...invoiceForm, notes: e.target.value})}
+                  className="w-full rounded-md border border-[#E8E8E8] px-3 py-2 text-sm outline-none focus:border-[#ED711D]" 
+                  placeholder="Optional details..."
+                />
+              </div>
+              <div className="mt-6 flex justify-end gap-3">
+                <button type="button" onClick={() => setIsInvoiceModalOpen(false)} className="px-4 py-2 text-sm font-semibold text-[#6B6B6B] hover:text-[#161616]">
+                  Cancel
+                </button>
+                <button type="submit" disabled={loading} className="px-4 py-2 rounded bg-[#ED711D] text-sm font-bold text-white hover:bg-[#D4611A] disabled:opacity-50">
+                  {loading ? "Saving..." : "Create Invoice"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
