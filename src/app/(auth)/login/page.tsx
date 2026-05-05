@@ -14,7 +14,7 @@ export default async function LoginPage({
 
   const signIn = async (formData: FormData) => {
     "use server";
-    const email = formData.get("email") as string;
+    const email = (formData.get("email") as string).trim();
     const password = formData.get("password") as string;
     
     const supabase = createServerSupabaseClient();

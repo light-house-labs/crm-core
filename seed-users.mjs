@@ -15,7 +15,8 @@ const usersToCreate = [
   { email: "jeffjoji6@gmail.com", name: "Jeff Joji", role: "admin" },
   { email: "sobinjohnson03@gmail.com", name: "Sobin", role: "admin" },
   { email: "sales@lighthouselabs.in", name: "Lighthouse Labs", role: "admin" },
-  { email: "ahsanbashirbusiness@gmail.com", name: "ahsan bashir", role: "admin" }
+  { email: "ahsanbashirbusiness@gmail.com", name: "ahsan bashir", role: "admin" },
+  { email: "labs.lighthouse@gmail.com", name: "Lighthouse Labs", role: "admin" }
 ];
 
 const DEFAULT_PASSWORD = "LighthousePassword123!";
@@ -38,6 +39,7 @@ async function seedUsers() {
     console.log(`✅ Whitelisted ${u.email}`);
 
     // 2. Create the user in Supabase Auth
+    // 2. Create the user in Supabase Auth
     const { data: authData, error: authError } = await supabase.auth.admin.createUser({
       email: u.email,
       password: DEFAULT_PASSWORD,
@@ -46,8 +48,20 @@ async function seedUsers() {
     });
 
     if (authError) {
-      // If user already exists, it will return an error, which is fine
-      console.log(`⚠️  Auth Note for ${u.email}:`, authError.message);
+      if (authError.message.includes("already been registered")) {
+        // Find user by email and update password
+        const { data: userData } = await supabase.auth.admin.listUsers();
+        const user = userData.users.find(uUser => uUser.email === u.email);
+        if (user) {
+          const { error: updateError } = await supabase.auth.admin.updateUserById(user.id, {
+            password: DEFAULT_PASSWORD
+          });
+          if (updateError) console.error(`❌ Failed to reset password for ${u.email}:`, updateError.message);
+          else console.log(`✅ Password reset to default for ${u.email}`);
+        }
+      } else {
+        console.error(`❌ Auth error for ${u.email}:`, authError.message);
+      }
     } else {
       console.log(`✅ Created Auth login for ${u.email}`);
     }

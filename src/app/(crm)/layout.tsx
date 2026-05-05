@@ -33,12 +33,14 @@ const navItems = [
 function Sidebar() {
   const pathname = usePathname();
   const [user, setUser] = useState<any>(null);
+  const [isLoadingUser, setIsLoadingUser] = useState(true);
 
   useEffect(() => {
     async function loadUser() {
       const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser();
       setUser(user);
+      setIsLoadingUser(false);
     }
     loadUser();
   }, []);
@@ -96,13 +98,13 @@ function Sidebar() {
         <div className="group flex items-center justify-between rounded-md px-2 py-2 hover:bg-[#F5F5F5] transition-colors">
           <div className="flex items-center gap-3 min-w-0">
             <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-[#ED711D] text-xs font-bold text-white uppercase">
-              {user?.email?.[0] || "U"}
+              {isLoadingUser ? "..." : (user?.email?.[0] || "U")}
             </div>
             <div className="min-w-0 flex-1">
               <p className="truncate text-xs font-semibold text-[#161616]">
-                {user?.user_metadata?.full_name || user?.user_metadata?.name || "User"}
+                {isLoadingUser ? "Loading..." : (user?.user_metadata?.full_name || user?.user_metadata?.name || "Dev User")}
               </p>
-              <p className="truncate text-[10px] text-[#6B6B6B]">{user?.email || "Loading..."}</p>
+              <p className="truncate text-[10px] text-[#6B6B6B]">{isLoadingUser ? "Loading..." : (user?.email || "dev@crm.local")}</p>
             </div>
           </div>
           <button 

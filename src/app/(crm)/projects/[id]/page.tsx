@@ -24,7 +24,7 @@ export default function ProjectProfilePage({ params }: { params: { id: string } 
       const supabase = createClient();
       
       const { data: projData } = await supabase.from("projects")
-        .select("*, contacts(first_name, last_name, company), assigned_to(name, email), leads(source)")
+        .select("*, contacts(first_name, last_name, company), assigned_to:allowed_users(name, email), leads!projects_lead_id_fkey(source)")
         .eq("id", params.id)
         .single();
         
@@ -91,6 +91,29 @@ export default function ProjectProfilePage({ params }: { params: { id: string } 
     setIsEditing(false);
   }
 
+  async function handleNewInvoice() {
+    const amount = prompt("Enter invoice amount:");
+    if (!amount || isNaN(Number(amount))) return;
+    
+    setLoading(true);
+    const supabase = createClient();
+    const newInvoice = {
+      project_id: params.id,
+      invoice_number: `INV-${Math.floor(Math.random() * 10000)}`,
+      amount: Number(amount),
+      due_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      status: 'draft'
+    };
+    
+    const { data, error } = await supabase.from('invoices').insert(newInvoice).select().single();
+    if (error) {
+      alert("Error creating invoice: " + error.message);
+    } else {
+      setInvoices([...invoices, data]);
+    }
+    setLoading(false);
+  }
+
   if (loading) return <div className="p-8 text-center text-gray-500 animate-pulse">Loading project details...</div>;
   if (!project) return <div className="p-8 text-center text-red-500">Project not found.</div>;
 
@@ -119,7 +142,7 @@ export default function ProjectProfilePage({ params }: { params: { id: string } 
           <button onClick={handleDelete} className="px-4 py-2 rounded-md bg-red-50 text-sm font-bold text-red-600 border border-red-200 hover:bg-red-100 transition-colors">
             Delete Project
           </button>
-          <button className="flex items-center gap-2 rounded-md bg-[#ED711D] px-4 py-2 text-sm font-bold text-white shadow-sm hover:bg-[#D4611A] transition-colors">
+          <button onClick={handleNewInvoice} className="flex items-center gap-2 rounded-md bg-[#ED711D] px-4 py-2 text-sm font-bold text-white shadow-sm hover:bg-[#D4611A] transition-colors">
             <Plus className="h-4 w-4" /> New Invoice
           </button>
         </div>

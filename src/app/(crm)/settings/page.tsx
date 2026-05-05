@@ -76,6 +76,14 @@ export default function SettingsPage() {
       const { data: authData, error: authError } = await supabase.auth.getUser();
 
       if (authError) {
+        if (authError.message.includes("Auth session missing")) {
+          // Gracefully fallback for local dev where middleware bypasses auth
+          setProfileName("Dev User");
+          setProfileEmail("dev@crm.local");
+          setUserRole("admin");
+          setIsLoadingProfile(false);
+          return;
+        }
         setStatusTone("error");
         setStatusMessage(authError.message);
         setIsLoadingProfile(false);
@@ -295,6 +303,17 @@ export default function SettingsPage() {
     showStatus("success", "Team member added. They can now be assigned to leads and projects.");
   };
 
+  const deleteTeamMember = async (id: string) => {
+    if (!window.confirm("Are you sure you want to remove this person?")) return;
+    const { error } = await supabase.from("allowed_users").delete().eq("id", id);
+    if (error) {
+      showStatus("error", error.message);
+      return;
+    }
+    setTeamMembers((current) => current.filter((m) => m.id !== id));
+    showStatus("success", "Team member removed.");
+  };
+
   const renderWorkspaceSection = () => (
     <div className="space-y-6">
       <div className="rounded-xl border border-[#E8E8E8] bg-white shadow-sm overflow-hidden">
@@ -330,30 +349,7 @@ export default function SettingsPage() {
                 className="w-full rounded border border-[#E8E8E8] bg-[#FAFAFA] px-3 py-2 text-sm text-[#6B6B6B]"
               />
             </div>
-            <div>
-              <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-[#ABABAB]">
-                Primary Color
-              </label>
-              <div className="flex items-center gap-2">
-                <div
-                  className="h-6 w-6 rounded border border-gray-200"
-                  style={{ backgroundColor: config.brand.primaryColor }}
-                />
-                <span className="text-sm font-medium text-[#161616]">{config.brand.primaryColor}</span>
-              </div>
-            </div>
-            <div>
-              <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-[#ABABAB]">
-                Accent Color
-              </label>
-              <div className="flex items-center gap-2">
-                <div
-                  className="h-6 w-6 rounded border border-gray-200"
-                  style={{ backgroundColor: config.brand.accentColor }}
-                />
-                <span className="text-sm font-medium text-[#161616]">{config.brand.accentColor}</span>
-              </div>
-            </div>
+
           </div>
         </div>
       </div>
@@ -474,9 +470,19 @@ export default function SettingsPage() {
                     <p className="truncate text-sm font-medium text-[#161616]">{member.name || member.email}</p>
                     <p className="truncate text-xs text-[#6B6B6B]">{member.email}</p>
                   </div>
-                  <span className="rounded-full bg-[#F4F4F5] px-3 py-1 text-xs font-semibold capitalize text-[#6B6B6B]">
-                    {member.role || "member"}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="rounded-full bg-[#F4F4F5] px-3 py-1 text-xs font-semibold capitalize text-[#6B6B6B]">
+                      {member.role || "member"}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => void deleteTeamMember(member.id)}
+                      className="flex h-7 w-7 shrink-0 items-center justify-center rounded text-[#6B6B6B] transition hover:bg-red-50 hover:text-red-600"
+                      aria-label="Remove person"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
                 </div>
               ))
             ) : (
