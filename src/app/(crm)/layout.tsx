@@ -245,7 +245,7 @@ function TopBar({ onMenuClick }: { onMenuClick: () => void }) {
           <h1 className="text-base font-semibold text-[#161616]">
           {currentPage?.name ?? "CRM"}
         </h1>
-        <p className="text-xs text-[#6B6B6B]">
+        <p className="hidden sm:block text-xs text-[#6B6B6B]">
           {config.brand.name} · {new Date().toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
         </p>
       </div>

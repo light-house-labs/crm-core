@@ -113,7 +113,7 @@ export default function LeadsPage() {
           />
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           {["all", ...config.pipeline.stages.map(stage => stage.id)].map((s) => (
             <button
               key={s}
@@ -131,7 +131,7 @@ export default function LeadsPage() {
       </div>
 
       {/* Table */}
-      <div className="rounded-xl border border-[#E8E8E8] bg-white shadow-sm pb-16">
+      <div className="rounded-xl border border-[#E8E8E8] bg-white shadow-sm pb-16 overflow-x-auto">
         <table className="min-w-full">
           <thead>
             <tr className="border-b border-[#E8E8E8] bg-[#FAFAFA]">

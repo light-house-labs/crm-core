@@ -102,7 +102,7 @@ export default function ProjectsPage() {
           />
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           {["all", "discovery", "design", "build", "review", "launch", "live"].map((p) => (
             <button
               key={p}

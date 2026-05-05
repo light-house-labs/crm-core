@@ -163,7 +163,7 @@ export default function ContactsPage() {
       </div>
 
       {/* Table */}
-      <div className="rounded-xl border border-[#E8E8E8] bg-white shadow-sm pb-16">
+      <div className="rounded-xl border border-[#E8E8E8] bg-white shadow-sm pb-16 overflow-x-auto">
         <table className="min-w-full">
           <thead>
             <tr className="border-b border-[#E8E8E8] bg-[#FAFAFA]">
