@@ -54,9 +54,10 @@ export async function POST(request: Request) {
       headers: { 'Access-Control-Allow-Origin': '*' }
     });
 
-  } catch (error: any) {
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Internal Server Error';
     console.error('Contact Webhook Error:', error);
-    return NextResponse.json({ error: error.message || 'Internal Server Error' }, { 
+    return NextResponse.json({ error: message }, { 
       status: 500,
       headers: { 'Access-Control-Allow-Origin': '*' }
     });

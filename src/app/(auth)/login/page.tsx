@@ -36,6 +36,7 @@ export default async function LoginPage({
         <div className="text-center">
           {config.brand.logoUrl && (
             <div className="mx-auto mb-6 h-12 w-auto flex justify-center">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={config.brand.logoUrl}
                 alt={`${config.brand.name} Logo`}

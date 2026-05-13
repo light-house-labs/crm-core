@@ -28,7 +28,6 @@ export async function POST(request: Request) {
       project_goals, 
       brand_assets_link, 
       digital_signature, 
-      agreement_checked, 
       signature_timestamp 
     } = body;
 
@@ -65,9 +64,10 @@ export async function POST(request: Request) {
       headers: { 'Access-Control-Allow-Origin': '*' }
     });
 
-  } catch (error: any) {
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Internal Server Error';
     console.error('Onboarding Webhook Error:', error);
-    return NextResponse.json({ error: error.message || 'Internal Server Error' }, { 
+    return NextResponse.json({ error: message }, { 
       status: 500,
       headers: { 'Access-Control-Allow-Origin': '*' }
     });

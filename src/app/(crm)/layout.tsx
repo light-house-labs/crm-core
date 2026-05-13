@@ -64,6 +64,7 @@ function Sidebar({ isOpen, setIsOpen }: { isOpen: boolean; setIsOpen: (val: bool
       <aside className={`fixed inset-y-0 left-0 z-50 flex w-64 flex-shrink-0 flex-col border-r border-[#E8E8E8] bg-white transition-transform duration-300 md:static md:translate-x-0 ${isOpen ? "translate-x-0" : "-translate-x-full"}`}>
         {/* Logo */}
         <div className="flex h-16 items-center justify-between border-b border-[#E8E8E8] px-5">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={config.brand.logoUrl} alt={config.brand.name} className="h-8 w-auto object-contain" />
           <button className="md:hidden text-[#6B6B6B]" onClick={() => setIsOpen(false)}>
             <X className="h-5 w-5" />
