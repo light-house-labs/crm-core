@@ -12,6 +12,10 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: `${config.brand.name} · CRM Platform`,
   description: "Professional white-label CRM platform for service businesses.",
+  robots: {
+    index: false,
+    follow: false,
+  },
 };
 
 export default function RootLayout({

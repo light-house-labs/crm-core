@@ -44,7 +44,7 @@ export async function POST(request: Request) {
       .from('projects')
       .insert([
         {
-          project_name: `${company_name} - Onboarding`,
+          project_name: `${company_name || 'Client'} - Onboarding`,
           description: project_goals,
           deliverables: `Role: ${client_role}\nEmail: ${client_email}\nPhone: ${client_phone}\nBrand Assets: ${brand_assets_link}\n\nDigital Signature: ${digital_signature}\nTimestamp: ${signature_timestamp}`,
           brand_kit_ready: !!brand_assets_link,

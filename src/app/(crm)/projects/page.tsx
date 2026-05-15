@@ -80,13 +80,24 @@ export default function ProjectsPage() {
           <h2 className="text-xl font-bold text-[#161616]">Projects</h2>
           <p className="text-sm text-[#6B6B6B] mt-0.5">{filtered.length} active projects</p>
         </div>
-        <Link
-          href="/projects/new"
-          className="flex items-center gap-2 rounded-lg bg-[#ED711D] px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-[#D4611A] active:scale-95 transition-all"
-        >
-          <Plus className="h-4 w-4" />
-          New Project
-        </Link>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => {
+              navigator.clipboard.writeText("https://www.lighthouselabs.in/forms");
+              alert("Onboarding form link copied to clipboard!");
+            }}
+            className="flex items-center gap-2 rounded-lg border border-[#E8E8E8] bg-white px-4 py-2.5 text-sm font-semibold text-[#161616] shadow-sm hover:bg-[#F5F5F5] active:scale-95 transition-all"
+          >
+            Copy Intake Link
+          </button>
+          <Link
+            href="/projects/new"
+            className="flex items-center gap-2 rounded-lg bg-[#ED711D] px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-[#D4611A] active:scale-95 transition-all"
+          >
+            <Plus className="h-4 w-4" />
+            New Project
+          </Link>
+        </div>
       </div>
 
       {/* Filter Bar */}
