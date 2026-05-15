@@ -40,6 +40,8 @@ export async function POST(request: Request) {
           email: user_email,
           message: message,
           source: 'Lighthouse Labs Website',
+          status: 'new',
+          pipeline_stage_id: 1,
         }
       ])
       .select();

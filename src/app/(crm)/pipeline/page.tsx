@@ -60,6 +60,8 @@ export default function PipelinePage() {
   const handleDrop = async (stageId: string) => {
     if (!dragging) return;
     
+    const stage = config.pipeline.stages.find(s => s.id === stageId);
+    
     // Optimistic UI update
     setLeads((prev) =>
       prev.map((l) => (l.id === dragging ? { ...l, status: stageId } : l))
@@ -67,7 +69,10 @@ export default function PipelinePage() {
     
     // Background DB update
     const supabase = createClient();
-    await supabase.from("leads").update({ status: stageId }).eq("id", dragging);
+    await supabase.from("leads").update({ 
+      status: stageId,
+      pipeline_stage_id: stage?.order,
+    }).eq("id", dragging);
     
     setDragging(null);
   };

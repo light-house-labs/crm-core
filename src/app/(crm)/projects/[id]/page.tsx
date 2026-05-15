@@ -19,7 +19,9 @@ export default function ProjectProfilePage({ params }: { params: { id: string } 
   const [users, setUsers] = useState<any[]>([]);
   const [isEditing, setIsEditing] = useState(false);
   const [isInvoiceModalOpen, setIsInvoiceModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [invoiceForm, setInvoiceForm] = useState({ amount: "", due_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], notes: "" });
+  const [editForm, setEditForm] = useState({ description: "", deliverables: "", out_of_scope: "", tech_stack: "", cms_hosting: "", integrations: "" });
 
   useEffect(() => {
     async function fetchProject() {
@@ -33,6 +35,14 @@ export default function ProjectProfilePage({ params }: { params: { id: string } 
       if (projData) {
         setProject(projData);
         setPctForm(projData.completion_pct || 0);
+        setEditForm({
+          description: projData.description || "",
+          deliverables: projData.deliverables || "",
+          out_of_scope: projData.out_of_scope || "",
+          tech_stack: projData.tech_stack || "",
+          cms_hosting: projData.cms_hosting || "",
+          integrations: projData.integrations || "",
+        });
       }
       
       const { data: invData } = await supabase.from("invoices").select("*").eq("project_id", params.id).order("due_date", { ascending: true });
@@ -119,6 +129,20 @@ export default function ProjectProfilePage({ params }: { params: { id: string } 
     setLoading(false);
   }
 
+  async function handleUpdateProject(e: React.FormEvent) {
+    e.preventDefault();
+    setLoading(true);
+    const supabase = createClient();
+    const { error } = await supabase.from('projects').update(editForm).eq('id', params.id);
+    if (error) {
+      alert("Error updating project: " + error.message);
+    } else {
+      setProject({ ...project, ...editForm });
+      setIsEditModalOpen(false);
+    }
+    setLoading(false);
+  }
+
   if (loading) return <div className="p-8 text-center text-gray-500 animate-pulse">Loading project details...</div>;
   if (!project) return <div className="p-8 text-center text-red-500">Project not found.</div>;
 
@@ -144,8 +168,8 @@ export default function ProjectProfilePage({ params }: { params: { id: string } 
           </div>
         </div>
         <div className="flex gap-3">
-          <button onClick={handleDelete} className="px-4 py-2 rounded-md bg-red-50 text-sm font-bold text-red-600 border border-red-200 hover:bg-red-100 transition-colors">
-            Delete Project
+          <button onClick={() => setIsEditModalOpen(true)} className="px-4 py-2 rounded-md bg-white text-sm font-bold text-[#161616] border border-[#E8E8E8] shadow-sm hover:bg-[#F5F5F5] transition-colors">
+            Edit Project
           </button>
           <button onClick={() => setIsInvoiceModalOpen(true)} className="flex items-center gap-2 rounded-md bg-[#ED711D] px-4 py-2 text-sm font-bold text-white shadow-sm hover:bg-[#D4611A] transition-colors">
             <Plus className="h-4 w-4" /> New Invoice
@@ -415,6 +439,98 @@ export default function ProjectProfilePage({ params }: { params: { id: string } 
                 <button type="submit" disabled={loading} className="px-4 py-2 rounded bg-[#ED711D] text-sm font-bold text-white hover:bg-[#D4611A] disabled:opacity-50">
                   {loading ? "Saving..." : "Create Invoice"}
                 </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {isEditModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-xl bg-white shadow-lg">
+            <div className="flex items-center justify-between border-b border-[#E8E8E8] px-6 py-4 sticky top-0 bg-white z-10">
+              <h3 className="text-lg font-bold text-[#161616]">Edit Project Details</h3>
+              <button onClick={() => setIsEditModalOpen(false)} className="text-[#6B6B6B] hover:text-[#161616]">
+                &times;
+              </button>
+            </div>
+            <form onSubmit={handleUpdateProject} className="p-6 space-y-5">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div className="space-y-4">
+                  <h4 className="text-xs font-bold uppercase tracking-widest text-[#ABABAB]">Scope</h4>
+                  <div>
+                    <label className="block text-sm font-medium text-[#161616] mb-1.5">Description</label>
+                    <textarea 
+                      rows={3} 
+                      value={editForm.description}
+                      onChange={e => setEditForm({...editForm, description: e.target.value})}
+                      className="w-full rounded-md border border-[#E8E8E8] px-3 py-2 text-sm outline-none focus:border-[#ED711D]" 
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-[#161616] mb-1.5">Deliverables</label>
+                    <textarea 
+                      rows={4} 
+                      value={editForm.deliverables}
+                      onChange={e => setEditForm({...editForm, deliverables: e.target.value})}
+                      className="w-full rounded-md border border-[#E8E8E8] px-3 py-2 text-sm outline-none focus:border-[#ED711D]" 
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-[#161616] mb-1.5">Out of Scope</label>
+                    <textarea 
+                      rows={2} 
+                      value={editForm.out_of_scope}
+                      onChange={e => setEditForm({...editForm, out_of_scope: e.target.value})}
+                      className="w-full rounded-md border border-[#E8E8E8] px-3 py-2 text-sm outline-none focus:border-[#ED711D]" 
+                    />
+                  </div>
+                </div>
+                
+                <div className="space-y-4">
+                  <h4 className="text-xs font-bold uppercase tracking-widest text-[#ABABAB]">Technical</h4>
+                  <div>
+                    <label className="block text-sm font-medium text-[#161616] mb-1.5">Tech Stack</label>
+                    <input 
+                      type="text" 
+                      value={editForm.tech_stack}
+                      onChange={e => setEditForm({...editForm, tech_stack: e.target.value})}
+                      className="w-full rounded-md border border-[#E8E8E8] px-3 py-2 text-sm outline-none focus:border-[#ED711D]" 
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-[#161616] mb-1.5">CMS / Hosting</label>
+                    <input 
+                      type="text" 
+                      value={editForm.cms_hosting}
+                      onChange={e => setEditForm({...editForm, cms_hosting: e.target.value})}
+                      className="w-full rounded-md border border-[#E8E8E8] px-3 py-2 text-sm outline-none focus:border-[#ED711D]" 
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-[#161616] mb-1.5">Integrations</label>
+                    <textarea 
+                      rows={2} 
+                      value={editForm.integrations}
+                      onChange={e => setEditForm({...editForm, integrations: e.target.value})}
+                      className="w-full rounded-md border border-[#E8E8E8] px-3 py-2 text-sm outline-none focus:border-[#ED711D]" 
+                    />
+                  </div>
+                </div>
+              </div>
+              
+              <div className="mt-6 pt-4 border-t border-[#E8E8E8] flex justify-between items-center">
+                <button type="button" onClick={handleDelete} className="text-sm font-semibold text-red-600 hover:text-red-800">
+                  Delete Project
+                </button>
+                <div className="flex gap-3">
+                  <button type="button" onClick={() => setIsEditModalOpen(false)} className="px-4 py-2 text-sm font-semibold text-[#6B6B6B] hover:text-[#161616]">
+                    Cancel
+                  </button>
+                  <button type="submit" disabled={loading} className="px-4 py-2 rounded bg-[#ED711D] text-sm font-bold text-white hover:bg-[#D4611A] disabled:opacity-50">
+                    {loading ? "Saving..." : "Save Changes"}
+                  </button>
+                </div>
               </div>
             </form>
           </div>

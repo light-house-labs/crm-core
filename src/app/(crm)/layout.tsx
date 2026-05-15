@@ -205,21 +205,44 @@ function TopBar({ onMenuClick }: { onMenuClick: () => void }) {
   useEffect(() => {
     async function loadNotifications() {
       const now = new Date().toISOString();
-      const { data: dueLeads } = await supabase
-        .from("leads")
-        .select("id, first_name, last_name, company, follow_up_at")
-        .lte("follow_up_at", now)
-        .order("follow_up_at", { ascending: true })
-        .limit(8);
+      const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+      
+      const [dueLeadsRes, newProjectsRes] = await Promise.all([
+        supabase
+          .from("leads")
+          .select("id, first_name, last_name, company, follow_up_at")
+          .lte("follow_up_at", now)
+          .order("follow_up_at", { ascending: true })
+          .limit(4),
+        supabase
+          .from("projects")
+          .select("id, project_name, created_at")
+          .gte("created_at", yesterday)
+          .order("created_at", { ascending: false })
+          .limit(4)
+      ]);
 
-      setNotifications(
-        (dueLeads ?? []).map((lead) => ({
-          id: lead.id,
+      const notifs: Array<{ id: string; title: string; subtitle: string; href: string }> = [];
+
+      (dueLeadsRes.data ?? []).forEach((lead) => {
+        notifs.push({
+          id: `lead-due-${lead.id}`,
           title: [lead.first_name, lead.last_name].filter(Boolean).join(" ") || lead.company || "Unnamed lead",
-          subtitle: lead.follow_up_at ? `Follow-up due ${new Date(lead.follow_up_at).toLocaleString()}` : "Follow-up due",
+          subtitle: `Follow-up due ${new Date(lead.follow_up_at).toLocaleDateString()}`,
           href: `/leads/${lead.id}`,
-        }))
-      );
+        });
+      });
+
+      (newProjectsRes.data ?? []).forEach((proj) => {
+        notifs.push({
+          id: `proj-new-${proj.id}`,
+          title: proj.project_name,
+          subtitle: `New project! Created ${new Date(proj.created_at).toLocaleTimeString()}`,
+          href: `/projects/${proj.id}`,
+        });
+      });
+
+      setNotifications(notifs);
     }
 
     void loadNotifications();

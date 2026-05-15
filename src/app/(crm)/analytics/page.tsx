@@ -29,7 +29,9 @@ export default function AnalyticsPage() {
       const totalLeads = leads?.length || 0;
       const wonStageId = config.pipeline.stages.find(stage => stage.id === "won")?.id || "converted";
       const convertedLeads = leads?.filter(l => l.status === wonStageId || l.status === "converted").length || 0;
-      const winRate = totalLeads > 0 ? Math.round((convertedLeads / totalLeads) * 100) : 0;
+      const lostLeads = leads?.filter(l => l.status === "lost").length || 0;
+      const closedLeads = convertedLeads + lostLeads;
+      const winRate = closedLeads > 0 ? Math.round((convertedLeads / closedLeads) * 100) : 0;
       
       const totalProjects = projects?.length || 0;
       const totalRevenue = projects?.reduce((sum, p) => sum + (p.total_budget || 0), 0) || 0;
